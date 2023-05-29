@@ -91,7 +91,7 @@ def generate_html_film(film, results):
     
     seances = generate_html_seance(results)
 
-    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary><img src=\"{film}.jpg\" width="50">{jour_sortie} | {synopsis}</details>".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
+    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary><img src=\"{film}.jpg\" width=\"50\">{jour_sortie} | {synopsis}</details>".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
 
     return html_chunk
 
