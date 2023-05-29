@@ -100,10 +100,11 @@ def generate_html_film(film, results):
 
     html_chunk = """
 <details>
-\n<summary>{film} <small>[{seances}]</small></summary>
+<summary>{film} <small>[{seances}]</small></summary>
 <div class="container">
 <div class="image"><img src=\"{film}.jpg\" width=\"160\"></div>
 <div class="text"><small>{jour_sortie}</small> <br> {synopsis}</div>
+<br>
 </details>
 """.format(film = normalise_path(film), jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
 
