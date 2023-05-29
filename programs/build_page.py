@@ -6,6 +6,8 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+from requests.adapters import HTTPAdapter, Retry
+
 
 def flatten(t):
     return [item for sublist in t for item in sublist if item]
@@ -26,8 +28,8 @@ def create_url(cinema, day):
     return url
 
 
-def get_url(url):
-    response = requests.get(url)
+def get_url(url, s):
+    response = s.get(url)
 
     if response.ok:
         results = BeautifulSoup(response.text, "lxml")
@@ -36,7 +38,7 @@ def get_url(url):
         return
 
 
-def parse_div(div):
+def parse_div(div, s):
     film_name = div.find('a', class_='meta-title-link').text
     synopsis = div.find('div', class_='synopsis').text.strip()
     showtimes_div = div.find('div', class_='showtimes-anchor')
@@ -47,7 +49,7 @@ def parse_div(div):
 
     filepath = os.path.join("output", normalise_path(film_name) + ".jpg")
     if not os.path.isfile(filepath):
-        response = requests.get(thumbnail_url)
+        response = s.get(thumbnail_url)
         with open(filepath, 'wb') as f:
             f.write(response.content)
 
@@ -62,21 +64,21 @@ def parse_div(div):
         return
 
 
-def parse_results(result):
+def parse_results(result, s):
     content = result.find("div", {"class": "showtimes-list-holder"})
     seances = content.find_all("div", {"class": "card entity-card entity-card-list movie-card-theater cf hred"})
     try:
-        seances = flatten([parse_div(seance) for seance in seances])
+        seances = flatten([parse_div(seance, s) for seance in seances])
         return seances
     except:
         return
 
 
-def scrap_page(cinema, day):
+def scrap_page(cinema, day, s):
     url = create_url(cinema, day)
-    result = get_url(url)
+    result = get_url(url, s)
     if result:
-        seances = parse_results(result)
+        seances = parse_results(result, s)
         return seances
 
 
@@ -129,6 +131,16 @@ def read_file(path):
 
 
 def main():
+    s = requests.Session()
+
+    retries = Retry(
+        total = 20,
+        backoff_factor = 0.1,
+        status_forcelist = [ 500, 502, 503, 504]
+        )
+
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+
     today = datetime.today().weekday()
     days_by_index = {
         0: "Lundi",
@@ -151,7 +163,7 @@ def main():
         }
 
     results = {
-      (cinema, day): scrap_page(cinema, day)
+      (cinema, day): scrap_page(cinema, day, s)
       for cinema in cinemas_by_code
       for day in days
       }
