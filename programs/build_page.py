@@ -1,3 +1,4 @@
+import os
 import pypandoc
 import pandas as pd
 import requests
@@ -38,18 +39,20 @@ def parse_div(div):
     hours = showtimes_div.find_all('div', class_='showtimes-hour-block')
 
     img_tag = div.find('img', class_='thumbnail-img')
-    thumbnail_url = img_tag['src']
+    thumbnail_url = img_tag.get('data-src', img_tag.get('src'))
 
-    response = requests.get(thumbnail_url)
-    with open("output/" + film_name + ".jpg", 'wb') as f:
-        f.write(response.content)
+    filepath = os.path.join("output", film_name + ".jpg")
+    if not os.path.isfile(filepath):
+        response = requests.get(thumbnail_url)
+        with open("output/" + film_name + ".jpg", 'wb') as f:
+            f.write(response.content)
 
     date_tag = div.find('span', class_='date')
     release_date = date_tag.text
-    
+
     try:
         showtimes = [hour.find('span', class_='showtimes-hour-item-value').text.strip() for hour in hours]
-        seances = [(film_name, synopsis, release_date, showtime) for showtime in showtimes]
+        seances = [(film_name, release_date, synopsis, showtime) for showtime in showtimes]
         return seances
     except:
         return
@@ -88,10 +91,17 @@ def generate_html_film(film, results):
     results = results[results["film"] == film]
     synopsis = results.synopsis.unique()[0]
     jour_sortie = results.jour_sortie.unique()[0]
-    
+
     seances = generate_html_seance(results)
 
-    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary><img src=\"{film}.jpg\" width=\"50\">{jour_sortie} | {synopsis}</details>".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
+    html_chunk = """
+<details>
+\n<summary>{film} <small>[{seances}]</small></summary>
+<div class="container">
+<div class="image"><img src=\"{film}.jpg\" width=\"160\"></div>
+<div class="text"><small>{jour_sortie}</small> <br> {synopsis}</div>
+</details>
+""".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
 
     return html_chunk
 
