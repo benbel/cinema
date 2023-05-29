@@ -38,7 +38,7 @@ def parse_div(div):
     hours = showtimes_div.find_all('div', class_='showtimes-hour-block')
 
     img_tag = div.find('img', class_='thumbnail-img')
-    thumbnail_url = img_tag['data-src']
+    thumbnail_url = img_tag['src']
 
     response = requests.get(thumbnail_url)
     with open("output/" + film_name + ".jpg", 'wb') as f:
