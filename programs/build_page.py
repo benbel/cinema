@@ -37,9 +37,19 @@ def parse_div(div):
     showtimes_div = div.find('div', class_='showtimes-anchor')
     hours = showtimes_div.find_all('div', class_='showtimes-hour-block')
 
+    img_tag = div.find('img', class_='thumbnail-img')
+    thumbnail_url = img_tag['data-src']
+
+    response = requests.get(thumbnail_url)
+    with open("output/" + film_name + ".jpg", 'wb') as f:
+        f.write(response.content)
+
+    date_tag = div.find('span', class_='date')
+    release_date = date_tag.text
+    
     try:
         showtimes = [hour.find('span', class_='showtimes-hour-item-value').text.strip() for hour in hours]
-        seances = [(film_name, synopsis, showtime) for showtime in showtimes]
+        seances = [(film_name, synopsis, release_date, showtime) for showtime in showtimes]
         return seances
     except:
         return
@@ -76,9 +86,11 @@ def generate_html_seance(results):
 def generate_html_film(film, results):
     results = results[results["film"] == film]
     synopsis = results.synopsis.unique()[0]
+    jour_sortie = results.jour_sortie.unique()[0]
+    
     seances = generate_html_seance(results)
 
-    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary>{synopsis}</details>".format(film = film, seances = seances, synopsis = synopsis)
+    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary>{jour_sortie} | {synopsis}</details>".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
 
     return html_chunk
 
@@ -131,12 +143,12 @@ def main():
     results = {key: value for key, value in results.items() if value}
 
     results = [
-      (cinemas_by_code[cinema], days_by_index[(day + today) % 7], film_name, synopsis, showtime)
+      (cinemas_by_code[cinema], days_by_index[(day + today) % 7], film_name, release_date, synopsis, showtime)
       for (cinema, day), seances in results.items()
-      for (film_name, synopsis, showtime) in seances
+      for (film_name, release_date, synopsis, showtime) in seances
       ]
 
-    results = pd.DataFrame(results, columns = ("cinema", "jour", "film", "synopsis", "heure"))
+    results = pd.DataFrame(results, columns = ("cinema", "jour", "film", "jour_sortie", "synopsis", "heure"))
     html_chunks = [generate_html_jour(jour, results) for jour in results.jour.unique()]
 
     text = \
