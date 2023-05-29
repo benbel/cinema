@@ -15,6 +15,10 @@ def to_html(md):
     return pypandoc.convert_text(md, 'html5', format = 'md')
 
 
+def normalise_path(filepath):
+    return filepath.replace(":", "")
+
+
 def create_url(cinema, day):
     day_code = "" if day == 0 else "d-{day}/".format(day = day)
     url = "https://www.allocine.fr/seance/{day_code}salle_gen_csalle={cinema}.html".format(day_code = day_code, cinema = cinema)
@@ -41,10 +45,10 @@ def parse_div(div):
     img_tag = div.find('img', class_='thumbnail-img')
     thumbnail_url = img_tag.get('data-src', img_tag.get('src'))
 
-    filepath = os.path.join("output", film_name + ".jpg")
+    filepath = os.path.join("output", normalise_path(film_name) + ".jpg")
     if not os.path.isfile(filepath):
         response = requests.get(thumbnail_url)
-        with open("output/" + film_name + ".jpg", 'wb') as f:
+        with open(filepath, 'wb') as f:
             f.write(response.content)
 
     date_tag = div.find('span', class_='date')
@@ -101,7 +105,7 @@ def generate_html_film(film, results):
 <div class="image"><img src=\"{film}.jpg\" width=\"160\"></div>
 <div class="text"><small>{jour_sortie}</small> <br> {synopsis}</div>
 </details>
-""".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
+""".format(film = normalise_path(film), jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
 
     return html_chunk
 
