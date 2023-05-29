@@ -83,6 +83,7 @@ def generate_html_seance(results):
     html_chunk = ', '.join(["{cinema} {seances}".format(cinema = cinema, seances = build_seances(cinema, results)) for cinema in cinemas])
     return html_chunk
 
+
 def generate_html_film(film, results):
     results = results[results["film"] == film]
     synopsis = results.synopsis.unique()[0]
@@ -90,7 +91,7 @@ def generate_html_film(film, results):
     
     seances = generate_html_seance(results)
 
-    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary>{jour_sortie} | {synopsis}</details>".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
+    html_chunk = "<details>\n<summary>{film} <small>[{seances}]</small></summary><img src=\"{film}.jpg\" width="50">{jour_sortie} | {synopsis}</details>".format(film = film, jour_sortie = jour_sortie, seances = seances, synopsis = synopsis)
 
     return html_chunk
 
