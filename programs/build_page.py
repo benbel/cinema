@@ -86,9 +86,9 @@ def generate_html_film(film, results):
 def generate_html_jour(jour, results):
     results = results[results["jour"] == jour]
 
-    bloc = "\n".join([generate_html_film(film, results) for film in results.film.unique()]) + "\n\n"
+    bloc = "\n".join([generate_html_film(film, results) for film in results.film.unique()])
 
-    html_chunk = "<details>\n<summary>{jour}</summary>{bloc}</details>".format(jour = jour, bloc = bloc)
+    html_chunk = "<details>\n<summary>{jour}</summary>{bloc}<br></details><br>".format(jour = jour, bloc = bloc)
 
     return html_chunk
 
