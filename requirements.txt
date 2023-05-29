@@ -1,5 +1,5 @@
 bs4
-requests
+lxml
 pypandoc_binary
 pandas
-
+requests
