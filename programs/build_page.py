@@ -139,7 +139,7 @@ def main():
         status_forcelist = [ 500, 502, 503, 504]
         )
 
-    s.mount('http://', HTTPAdapter(max_retries=retries))
+    s.mount('https://', HTTPAdapter(max_retries=retries))
 
     today = datetime.today().weekday()
     days_by_index = {
