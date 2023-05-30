@@ -54,8 +54,11 @@ def parse_div(div, s):
             f.write(response.content)
 
     date_tag = div.find('span', class_='date')
-    release_date = date_tag.text
-
+    if date_tag:
+        release_date = date_tag.text
+    else:
+        release_date = ""
+    
     try:
         showtimes = [hour.find('span', class_='showtimes-hour-item-value').text.strip() for hour in hours]
         seances = [(film_name, release_date, synopsis, showtime) for showtime in showtimes]
