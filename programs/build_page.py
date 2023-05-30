@@ -21,8 +21,9 @@ def normalise_path(filepath):
     return filepath.replace(":", "")
 
 
-def create_url(cinema, day):
+def create_url(cinema, day, page):
     day_code = "" if day == 0 else "d-{day}/".format(day = day)
+    page_code = "" if page == 0 else "?page={page}".format(page = page)
     url = "https://www.allocine.fr/seance/{day_code}salle_gen_csalle={cinema}.html".format(day_code = day_code, cinema = cinema)
 
     return url
@@ -58,7 +59,7 @@ def parse_div(div, s):
         release_date = date_tag.text
     else:
         release_date = ""
-    
+
     try:
         showtimes = [hour.find('span', class_='showtimes-hour-item-value').text.strip() for hour in hours]
         seances = [(film_name, release_date, synopsis, showtime) for showtime in showtimes]
@@ -77,8 +78,8 @@ def parse_results(result, s):
         return
 
 
-def scrap_page(cinema, day, s):
-    url = create_url(cinema, day)
+def scrap_page(cinema, day, page, s):
+    url = create_url(cinema, day, page)
     result = get_url(url, s)
     if result:
         seances = parse_results(result, s)
@@ -165,17 +166,20 @@ def main():
         "C2954": "bibliothèque"
         }
 
+    pages = [1, 2]
+
     results = {
-      (cinema, day): scrap_page(cinema, day, s)
+      (cinema, day, page): scrap_page(cinema, day, page, s)
       for cinema in cinemas_by_code
       for day in days
+      for page in pages
       }
 
     results = {key: value for key, value in results.items() if value}
 
     results = [
       (cinemas_by_code[cinema], days_by_index[(day + today) % 7], film_name, release_date, synopsis, showtime)
-      for (cinema, day), seances in results.items()
+      for (cinema, day, page), seances in results.items()
       for (film_name, release_date, synopsis, showtime) in seances
       ]
 
