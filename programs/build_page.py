@@ -88,7 +88,8 @@ def scrap_page(cinema, day, page, s):
 
 def build_seances(cinema, results):
     results = results[results["cinema"] == cinema]
-    return "/".join(results.heure.unique())
+    heures = sorted(results.heure.unique())
+    return "/".join(heures)
 
 
 def generate_html_seance(results):
@@ -106,7 +107,7 @@ def generate_html_film(film, results):
 
     html_chunk = """
 <details>
-<summary>{film} <small>[{seances}]</small></summary>
+<summary>{film}<br><small>{seances}</small></summary>
 <div class="container">
 <div class="image"><img src=\"{film}.jpg\" width=\"160\"></div>
 <div class="text"><small>{jour_sortie}</small> <br> {synopsis}</div>
