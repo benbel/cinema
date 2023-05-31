@@ -94,7 +94,7 @@ def build_seances(cinema, results):
 
 def generate_html_seance(results):
     cinemas = results.cinema.unique()
-    html_chunk = '\n'.join(["{cinema} {seances}".format(cinema = cinema, seances = build_seances(cinema, results)) for cinema in cinemas])
+    html_chunk = '\n'.join(["{cinema} {seances}<br>".format(cinema = cinema, seances = build_seances(cinema, results)) for cinema in cinemas])
     return html_chunk
 
 
