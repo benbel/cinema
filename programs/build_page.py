@@ -18,13 +18,16 @@ def to_html(md):
 
 
 def normalise_path(filepath):
-    return filepath.replace(":", "")
+    for problem_char in [":", "'", "."]:
+        filepath = filepath.replace(problem_char, "")
+        
+    return filepath
 
 
 def create_url(cinema, day, page):
     day_code = "" if day == 0 else "d-{day}/".format(day = day)
     page_code = "" if page == 1 else "?page={page}".format(page = page)
-    url = "https://www.allocine.fr/seance/{day_code}salle_gen_csalle={cinema}.html".format(day_code = day_code, cinema = cinema)
+    url = "https://www.allocine.fr/seance/{day_code}salle_gen_csalle={cinema}.html{page_code}".format(day_code = day_code, cinema = cinema, page_code = page_code)
 
     return url
 
