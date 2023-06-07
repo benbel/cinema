@@ -49,7 +49,7 @@ def parse_hour(hour):
     if singular:
         return singular.text.strip()
     elif plural:
-        return plural.text.stip()
+        return plural.text.strip()
     else:
         return
     
