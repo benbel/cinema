@@ -20,7 +20,7 @@ def to_html(md):
 def normalise_path(filepath):
     for problem_char in [":", "'", "."]:
         filepath = filepath.replace(problem_char, "")
-        
+
     return filepath
 
 
@@ -45,15 +45,15 @@ def get_url(url, s):
 def parse_hour(hour):
     singular = hour.find('span', class_='showtimes-hour-item-value')
     plural = hour.find('span', class_='showtimes-hours-item-value')
-    
+
     if singular:
         return singular.text.strip()
     elif plural:
         return plural.text.strip()
     else:
         return
-    
-    
+
+
 def parse_div(div, s):
     film_name = div.find('a', class_='meta-title-link').text
     synopsis = div.find('div', class_='synopsis').text.strip()
@@ -175,11 +175,13 @@ def main():
     days = range(7)
 
     cinemas_by_code = {
-        "C0020": "filmothèque",
-        "C0071": "écoles",
-        "C0054": "arlequin",
         "C0015": "christine",
-        "C2954": "bibliothèque"
+        "C0020": "filmothèque",
+        "C0054": "arlequin",
+        "C0071": "écoles",
+        "C0092": "saint michel",
+        "C0097": "odéon",
+        "C2954": "bibliothèque",
         }
 
     pages = [1, 2]
