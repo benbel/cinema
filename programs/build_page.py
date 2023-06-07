@@ -42,6 +42,18 @@ def get_url(url, s):
         return
 
 
+def parse_hour(hour):
+    singular = hour.find('span', class_='showtimes-hour-item-value')
+    plural = hour.find('span', class_='showtimes-hours-item-value')
+    
+    if singular:
+        return singular.text.strip()
+    elif plural:
+        return plural.text.stip()
+    else:
+        return
+    
+    
 def parse_div(div, s):
     film_name = div.find('a', class_='meta-title-link').text
     synopsis = div.find('div', class_='synopsis').text.strip()
@@ -64,7 +76,7 @@ def parse_div(div, s):
         release_date = ""
 
     try:
-        showtimes = [hour.find('span', class_='showtimes-hour-item-value').text.strip() for hour in hours]
+        showtimes = [parse_hour(hour) for hour in hours]
         seances = [(film_name, release_date, synopsis, showtime) for showtime in showtimes]
         return seances
     except:
