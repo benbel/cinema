@@ -202,7 +202,7 @@ def main():
       ]
 
     results = pd.DataFrame(results, columns = ("cinema", "jour", "film", "jour_sortie", "synopsis", "heure"))
-    html_chunks = [generate_html_jour(jour, results) for jour in results.jour.unique()]
+    html_chunks = [generate_html_jour(jour, results) for jour in sorted(results.jour.unique())]
 
     text = \
         read_file("programs/header.html") \
