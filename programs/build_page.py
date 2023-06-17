@@ -171,6 +171,8 @@ def main():
         5: "Samedi",
         6: "Dimanche"
         }
+    
+    index_by_day = {day: index for index, day in days_by_index.items()}
 
     days = range(7)
 
@@ -202,7 +204,7 @@ def main():
       ]
 
     results = pd.DataFrame(results, columns = ("cinema", "jour", "film", "jour_sortie", "synopsis", "heure"))
-    html_chunks = [generate_html_jour(jour, results) for jour in sorted(results.jour.unique())]
+    html_chunks = [generate_html_jour(jour, results) for jour in sorted(results.jour.unique(), key = lambda jour: (index_by_day[jour] - today) % 7]
 
     text = \
         read_file("programs/header.html") \
