@@ -204,7 +204,8 @@ def main():
       ]
 
     results = pd.DataFrame(results, columns = ("cinema", "jour", "film", "jour_sortie", "synopsis", "heure"))
-    html_chunks = [generate_html_jour(jour, results) for jour in sorted(results.jour.unique(), key = lambda jour: (index_by_day[jour] - today) % 7]
+    sorted_days = sorted(results.jour.unique(), key = lambda jour: (index_by_day[jour] - today) % 7)
+    html_chunks = [generate_html_jour(jour, results) for jour in sorted_days]
 
     text = \
         read_file("programs/header.html") \
