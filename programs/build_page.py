@@ -18,7 +18,7 @@ def to_html(md):
 
 
 def normalise_path(filepath):
-    for problem_char in ['"', ":", "'", "."]:
+    for problem_char in ['"', ":", "'", ".", "?"]:
         filepath = filepath.replace(problem_char, "")
 
     return filepath
