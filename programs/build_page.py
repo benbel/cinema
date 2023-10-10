@@ -16,7 +16,6 @@ def flatten(t):
 def to_html(md):
     return pypandoc.convert_text(md, 'html5', format = 'md')
 
-Double quote ", Colon :, Less than <, Greater than >, Vertical bar |, Asterisk *, Question mark ?, Carriage return \r, Line feed \n
 def normalise_path(filepath):
     problem_chars = ['"', ":", "<", ">", "|", "*", "?", "\r", "\n"]
     
