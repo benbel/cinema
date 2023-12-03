@@ -16,6 +16,7 @@ def flatten(t):
 def to_html(md):
     return pypandoc.convert_text(md, 'html5', format = 'md')
 
+
 def normalise_path(filepath):
     problem_chars = ['"', ":", "<", ">", "|", "*", "?", "\r", "\n"]
     
@@ -178,13 +179,10 @@ def main():
     days = range(7)
 
     cinemas_by_code = {
-        "C0015": "christine",
-        "C0020": "filmothèque",
-        "C0054": "arlequin",
-        "C0071": "écoles",
-        "C0092": "saint michel",
-        "C0097": "odéon",
+        "C0026": "bercy",
+        "C0144": "nation",
         "C2954": "bibliothèque",
+        "C0020": "filmothèque"
         }
 
     pages = [1, 2]
