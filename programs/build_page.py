@@ -196,6 +196,7 @@ def main():
         6: "Dimanche"
         }
 
+    index_by_day = {day: index for index, day in days_by_index.items()}
     today = datetime.today().weekday()
 
     results = [
