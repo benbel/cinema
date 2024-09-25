@@ -28,7 +28,7 @@ def normalise_path(filepath):
 
 def create_url(cinema, date, page):
     page_code = "" if page == 1 else "?page={page}".format(page = page)
-    url = "https://www.allocine.fr/seance/salle_gen_csalle={cinema}.html#shwt_date={date}{page_code}".format(cinema = cinema, date = date, page_code = page_code)
+    url = "https://www.allocine.fr/seance/salle_gen_csalle={cinema}.html#shwt_date={date}{page_code}".format(cinema = cinema, date = date.strftime('%Y-%m-%d'), page_code = page_code)
 
     return url
 
@@ -164,7 +164,7 @@ def main():
 
     today = datetime.today()
     dates = [
-        (today +  timedelta(days = k)).strftime('%Y-%m-%d')
+        (today +  timedelta(days = k))
         for k in range(7)
         ]
 
@@ -199,8 +199,8 @@ def main():
     today = datetime.today().weekday()
 
     results = [
-      (cinemas_by_code[cinema], days_by_index[(day + today) % 7], film_name, release_date, synopsis, showtime)
-      for (cinema, day, page), seances in results.items()
+      (cinemas_by_code[cinema], days_by_index[date.get_weekday()], film_name, release_date, synopsis, showtime)
+      for (cinema, date, page), seances in results.items()
       for (film_name, release_date, synopsis, showtime) in seances
       ]
 
