@@ -199,7 +199,7 @@ def main():
     today = datetime.today().weekday()
 
     results = [
-      (cinemas_by_code[cinema], days_by_index[date.get_weekday()], film_name, release_date, synopsis, showtime)
+      (cinemas_by_code[cinema], days_by_index[date.weekday()], film_name, release_date, synopsis, showtime)
       for (cinema, date, page), seances in results.items()
       for (film_name, release_date, synopsis, showtime) in seances
       ]
