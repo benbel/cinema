@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from requests.adapters import HTTPAdapter, Retry
 
@@ -26,10 +26,9 @@ def normalise_path(filepath):
     return filepath
 
 
-def create_url(cinema, day, page):
-    day_code = "" if day == 0 else "d-{day}/".format(day = day)
+def create_url(cinema, date, page):
     page_code = "" if page == 1 else "?page={page}".format(page = page)
-    url = "https://www.allocine.fr/seance/{day_code}salle_gen_csalle={cinema}.html{page_code}".format(day_code = day_code, cinema = cinema, page_code = page_code)
+    url = "https://www.allocine.fr/seance/salle_gen_csalle={cinema}.html#shwt_date={date}{page_code}".format(cinema = cinema, date = date, page_code = page_code)
 
     return url
 
@@ -163,20 +162,11 @@ def main():
 
     s.mount('https://', HTTPAdapter(max_retries=retries))
 
-    today = datetime.today().weekday()
-    days_by_index = {
-        0: "Lundi",
-        1: "Mardi",
-        2: "Mercredi",
-        3: "Jeudi",
-        4: "Vendredi",
-        5: "Samedi",
-        6: "Dimanche"
-        }
-    
-    index_by_day = {day: index for index, day in days_by_index.items()}
-
-    days = range(7)
+    today = datetime.today()
+    dates = [
+        (today +  timedelta(days = k)).strftime('%Y-%m-%d')
+        for k in range(7)
+        ]
 
     cinemas_by_code = {
         "C0026": "bercy",
@@ -188,13 +178,25 @@ def main():
     pages = [1, 2]
 
     results = {
-      (cinema, day, page): scrap_page(cinema, day, page, s)
+      (cinema, date, page): scrap_page(cinema, date, page, s)
       for cinema in cinemas_by_code
-      for day in days
+      for date in dates
       for page in pages
       }
 
     results = {key: value for key, value in results.items() if value}
+
+    days_by_index = {
+        0: "Lundi",
+        1: "Mardi",
+        2: "Mercredi",
+        3: "Jeudi",
+        4: "Vendredi",
+        5: "Samedi",
+        6: "Dimanche"
+        }
+
+    today = datetime.today().weekday()
 
     results = [
       (cinemas_by_code[cinema], days_by_index[(day + today) % 7], film_name, release_date, synopsis, showtime)
