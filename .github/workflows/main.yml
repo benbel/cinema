@@ -45,7 +45,7 @@ jobs:
           name: output
           path: output
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           path: "output/"
       - name: Deploy to GitHub Pages
