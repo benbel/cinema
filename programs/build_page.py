@@ -173,7 +173,8 @@ def main():
         "C0144": "nation",
         "C2954": "bibliothèque",
         "C0020": "filmothèque",
-        "C0040": "bastille"
+        "C0040": "bastille",
+        "C0139": "majestic"
         }
 
     pages = [1, 2]
