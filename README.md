@@ -1,3 +1,3 @@
-# cinema
+# Cinéma
 
 Horaires de cinéma.
