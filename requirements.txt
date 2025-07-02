@@ -3,3 +3,4 @@ lxml
 pypandoc_binary
 pandas
 requests
+Jinja2
