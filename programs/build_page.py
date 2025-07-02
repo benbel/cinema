@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 from requests.adapters import HTTPAdapter, Retry
 
 # Import configuration data
-from .config_data import CINEMAS_BY_CODE, DAYS_BY_INDEX # Relative import
+from programs.config_data import CINEMAS_BY_CODE, DAYS_BY_INDEX
 
 # Constants
 OUTPUT_DIR = "output"
-IMAGE_DIR_NAME = "" # Images will be in OUTPUT_DIR directly for simplicity with current template
-TEMPLATES_DIR = "./templates" # Relative to where the script is run from (project root)
+IMAGE_DIR_NAME = ""  # Images will be in OUTPUT_DIR directly for simplicity with current template
+TEMPLATES_DIR = "./templates"  # Relative to where the script is run from (project root)
 ALLOCINE_BASE_URL = "https://www.allocine.fr/seance/salle_gen_csalle={cinema}.html#shwt_date={date}{page_code}"
 DEFAULT_RETRY_TOTAL = 20
 DEFAULT_RETRY_BACKOFF_FACTOR = 0.1
@@ -32,8 +32,9 @@ def flatten_list(list_of_lists):
     return [item for sublist in list_of_lists for item in sublist if item]
 
 
-def normalise_path_component(filename_component):
+def normalize_path_component(filename_component):
     """Removes problematic characters from a string to make it a valid path component."""
+    # Characters considered problematic for file/path names
     problem_chars = ['"', ":", "<", ">", "|", "*", "?", "\r", "\n", "/"] # Added /
     
     for problem_char in problem_chars:
@@ -51,12 +52,11 @@ def create_allocine_url(cinema_code, date_obj, page_num):
 def fetch_url_content(url, session):
     """Fetches content from a URL using the provided session."""
     try:
-        response = session.get(url, timeout=10) # Added timeout
-        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        response = session.get(url, timeout=10)  # Added timeout
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         return BeautifulSoup(response.text, "lxml")
     except requests.exceptions.RequestException as e:
-        # Log error or handle appropriately in a real application
-        # print(f"Error fetching {url}: {e}")
+        # print(f"Error fetching {url}: {e}") # Optional: Log error
         return None
 
 
@@ -76,7 +76,7 @@ def download_image(url, filepath, session):
     """Downloads an image from a URL and saves it to a filepath."""
     if not os.path.isfile(filepath):
         try:
-            response = session.get(url, timeout=10) # Added timeout
+            response = session.get(url, timeout=10)  # Added timeout
             response.raise_for_status()
             # Ensure output directory for images exists
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -84,7 +84,7 @@ def download_image(url, filepath, session):
                 f.write(response.content)
             return True
         except requests.exceptions.RequestException as e:
-            # print(f"Error downloading image {url}: {e}")
+            # print(f"Error downloading image {url}: {e}") # Optional: Log error
             return False
     return False
 
@@ -106,7 +106,7 @@ def parse_movie_div(div_element, session):
 
         # Image path logic: save directly into OUTPUT_DIR
         # The template will use <img src="normalized_film_name.jpg">
-        normalized_film_name = normalise_path_component(film_name)
+        normalized_film_name = normalize_path_component(film_name)
         image_filename = f"{normalized_film_name}.jpg"
         # The film_path for the template will be just the filename, as index.html is in OUTPUT_DIR
         image_save_path = os.path.join(OUTPUT_DIR, image_filename)
@@ -118,14 +118,14 @@ def parse_movie_div(div_element, session):
         release_date = release_date_tag.text.strip() if release_date_tag else ""
 
         showtimes = [parse_showtime_hour(hour) for hour in hour_elements]
-        showtimes = [st for st in showtimes if st] # Filter out None values
+        showtimes = [st for st in showtimes if st]  # Filter out None values
 
-        if not showtimes: # Skip movie if no showtimes found for it in this block
+        if not showtimes:  # Skip movie if no showtimes found for it in this block
             return []
 
         return [(film_name, release_date, synopsis, showtime, image_filename) for showtime in showtimes]
     except Exception as e:
-        # print(f"Error parsing movie div: {e}")
+        print(f"Error parsing movie div for '{film_name}': {e}")
         return []
 
 
@@ -138,7 +138,8 @@ def parse_page_results(beautifulsoup_results, session):
     if not content_holder:
         return []
 
-    movie_cards = content_holder.find_all("div", {"class": "card entity-card entity-card-list movie-card-theater cf hred"})
+    movie_card_classes = "card entity-card entity-card-list movie-card-theater cf hred"
+    movie_cards = content_holder.find_all("div", {"class": movie_card_classes})
 
     all_seances_for_page = []
     for seance_div in movie_cards:
@@ -245,32 +246,40 @@ def main():
                     for seance in page_seances:
                         # seance is (film_name, release_date, synopsis, showtime, image_filename)
                         scraped_data.append((cinema_name, day_name) + seance)
-                else: # If a page has no results, likely no more pages for this cinema/day
+                else:  # If a page has no results, likely no more pages for this cinema/day
                     break
 
     if not scraped_data:
         index_template = template_env.get_template("index.html")
-        final_html = index_template.render(content="<p>No showtime data available at the moment.</p>")
+        final_html = index_template.render(
+            content="<p>No showtime data available at the moment.</p>"
+        )
         print(final_html)
         return
 
-    results_df = pd.DataFrame(
-        scraped_data,
-        columns=["cinema", "jour", "film", "jour_sortie", "synopsis", "heure", "image_filename"]
-    )
+    df_columns = [
+        "cinema", "jour", "film", "jour_sortie",
+        "synopsis", "heure", "image_filename"
+    ]
+    results_df = pd.DataFrame(scraped_data, columns=df_columns)
 
     # Sort days chronologically starting from today
     index_by_day = {day: index for index, day in DAYS_BY_INDEX.items()}
     today_weekday_index = current_date.weekday()
 
     # Create a categorical type for days to ensure correct sorting
-    day_categories = sorted(results_df.jour.unique(), key=lambda d: (index_by_day[d] - today_weekday_index + 7) % 7)
-    results_df['jour'] = pd.Categorical(results_df['jour'], categories=day_categories, ordered=True)
-    results_df = results_df.sort_values(by="jour") # Sort DataFrame by this categorical "jour"
+    day_categories = sorted(
+        results_df.jour.unique(),
+        key=lambda d: (index_by_day[d] - today_weekday_index + 7) % 7
+    )
+    results_df['jour'] = pd.Categorical(
+        results_df['jour'], categories=day_categories, ordered=True
+    )
+    results_df = results_df.sort_values(by="jour")  # Sort DataFrame by this categorical "jour"
 
     day_html_blocks = [
         render_day_html(day_name, day_df)
-        for day_name, day_df in results_df.groupby("jour", observed=True) # Use observed=True with categorical
+        for day_name, day_df in results_df.groupby("jour", observed=True)  # Use observed=True with categorical
     ]
 
     main_content_html = "\n".join(day_html_blocks)
