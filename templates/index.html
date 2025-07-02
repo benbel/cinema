@@ -34,9 +34,9 @@
     </style>
   </head>
   <body>
-    <script>
-        $('details').click(function (event) {
-    $('details').not(this).removeAttr("open");  
-});
-      </script>
     <p>Cinémas</p>
+
+    {{ content | safe }}
+
+</body>
+</html>
